@@ -1,0 +1,65 @@
+from rply import ParserGenerator
+
+import ast
+
+
+pg = ParserGenerator(
+    ["SEMICOLON", "NUMBER", "ADD", "SUB", "MULT", "DIV", "SHOW", "NAME",
+     "ASSIGN", "BOOLEAN", "EQUALS","UNKNOWN_COMMAND"],
+    precedence=[
+        ("left", ["ADD", "SUB"]),
+        ("left", ["MULT", "DIV"])
+    ]
+)
+
+
+@pg.production("statements : statements statement")
+def statements(s):
+    return ast.Block(s[0].getastlist() + [s[1]])
+
+
+@pg.production("statements : statement")
+def statements_statement(s):
+    return ast.Block([s[0]])
+
+
+@pg.production("statement : expression SEMICOLON")
+def statement_expression(s):
+    return ast.Statement(s[0])
+
+
+@pg.production("statement : SHOW expression SEMICOLON")
+def statement_show(s):
+    return ast.Show(s[1])
+
+
+@pg.production("statement : NAME ASSIGN expression SEMICOLON")
+def statement_assign(s):
+    return ast.Assignment(s[0].getstr(), s[2])
+
+
+@pg.production("expression : NAME")
+def expression_name(s):
+    return ast.Name(s[0].getstr())
+
+
+@pg.production("expression : NUMBER")
+def expression_number(s):
+    return ast.Number(int(s[0].getstr()))
+
+
+@pg.production("expression : BOOLEAN")
+def expression_boolean(s):
+    val = True if s[0].getstr() == "True" else False
+    return ast.Boolean(val)
+
+@pg.production("expression : expression ADD expression")
+@pg.production("expression : expression SUB expression")
+@pg.production("expression : expression MULT expression")
+@pg.production("expression : expression DIV expression")
+@pg.production("expression : expression EQUALS expression")
+def expression_binop(s):
+    return ast.BinaryOp(s[1].getstr(), s[0], s[2])
+
+
+parser = pg.build()

@@ -1,0 +1,15 @@
+show 1+4+5-2-1*5;
+show 1;
+a=10; b=7; c=a+b;
+show c;
+1;
+variable_with_no_value;
+a=False;
+show a;
+l=10;
+o=10;
+show l==o;
+k=5;
+i=6;
+m = k==i;
+show m;
